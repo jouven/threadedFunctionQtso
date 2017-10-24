@@ -4,19 +4,21 @@
 build-Desktop-Debug/
 build-Desktop-Release/
 build-Desktop-Profile/
-release/
-debug/
+DebugWin/
+ReleaseWin/
+.externalToolBuilders/
+.settings/
 
 #files
-.qmake.stash
-Makefile
-Makefile.Debug
-Makefile.Release
+.project
+.cproject
 includeheaders
-includereleaseso
-includedebugso
 
 #file types
 *.o
+*.d
 *.exe
 *.pro.user
+*.so
+*.dll
+*.a
