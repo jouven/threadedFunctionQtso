@@ -1,5 +1,5 @@
 # threadedFunctionQtso
-Simple helper library to manage QThreads, provides a thread counter and a way to easly "QThread" a function.
+Simple helper library to manage QThreads, provides a thread counter and a way to easily "QThread" a function.
 
 Compilation
 -----------
