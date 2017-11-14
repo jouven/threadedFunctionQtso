@@ -7,7 +7,7 @@
 
 //number of qthreads, this number is directly related to the use of the threadedFunction_c
 //the class increases and decreases it
-extern uint_fast32_t QThreadCount_f();
+extern uint_fast32_t qThreadCount_f();
 
 //like a regular QThread it must be deleted manually
 class threadedFunction_c : public QThread
@@ -15,6 +15,7 @@ class threadedFunction_c : public QThread
     Q_OBJECT
 
     void run() override;
+protected:
     std::function<void()> func_pri;
 public:
     //this allows to run a regular function in a thread
