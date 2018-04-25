@@ -49,8 +49,7 @@ CONFIG(debug, debug|release){
 
 }
 
-if (android)
-{
+if (android){
 #release
 CONFIG(release, debug|release){
     LIBS += -L$${MYPATH}home/jouven/mylibsAndroid/release/
