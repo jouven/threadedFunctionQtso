@@ -1,6 +1,8 @@
 #ifndef THREADEDFUNCTIONQTSO_THREADEDFUNCTION_HPP
 #define THREADEDFUNCTIONQTSO_THREADEDFUNCTION_HPP
 
+#include "crossPlatformMacros.hpp"
+
 #include <QThread>
 
 #include <functional>
@@ -8,7 +10,7 @@
 //like QThread but with an internal counter of running threads
 //so the amount of threads running at the same thread can be managed
 //like a regular QThread it must be deleted manually
-class threadedFunction_c : public QThread
+class EXPIMP_THREADEDFUNCTIONQTSO threadedFunction_c : public QThread
 {
     Q_OBJECT
 
