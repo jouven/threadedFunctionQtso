@@ -15,6 +15,10 @@ class threadManager_c : public QObject
 
     std::deque<threadedFunction_c*> threadStartFunctionQueue_pri;
 
+    //this is to give somekind of default id to a thread, this will be used
+    //for a thread name for a threadedFunction_c object
+    //even if a threadName is given it will be appended at the end
+    std::atomic_int64_t threadId_pri = 0;
     //doesn't take into account the mainthread, so in total it would be the main thread +1
     std::atomic_int_fast32_t maxQThreads_pri = 1;
     //if it's greater than 0 other QThreads are still running
@@ -28,11 +32,19 @@ public:
     int_fast32_t threadCounterQt_f() const;
 
     void threadTryingToStart_f(threadedFunction_c* thread_ptr_par);
+
+    int_fast64_t getNewThreadId_f();
 //public Q_SLOTS:
 
 private Q_SLOTS:
     void threadFinished_f();
 };
+
+int_fast64_t threadManager_c::getNewThreadId_f()
+{
+    threadId_pri = threadId_pri + 1;
+    return threadId_pri;
+}
 
 int_fast32_t threadManager_c::maxQThreads_f() const
 {
@@ -104,11 +116,14 @@ threadManager_c& threadManager_f()
 threadedFunction_c::threadedFunction_c(
         std::function<void()> func_par
         , const bool startEventLoop_par_con
-        , QObject * parent_par)
+        , QObject * parent_par
+        , const QString& threadName_par_con)
     : QThread(parent_par)
     , func_pri(func_par)
     , startEventLoop_pri(startEventLoop_par_con)
-{}
+{
+    setObjectName(threadName_par_con + "_" + QString::number(threadManager_f().getNewThreadId_f()));
+}
 
 threadedFunction_c::threadedFunction_c(QObject *parent_par) : threadedFunction_c({}, parent_par)
 {}

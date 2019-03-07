@@ -27,6 +27,10 @@ public:
             std::function<void()> func_par
             , const bool startEventLoop_par_con = false
             , QObject *parent_par = nullptr
+            //only used in the log library right now
+            //since multiple threads can create entries at the same time
+            //it helps giving more context about what's going on
+            , const QString& threadName_par_con = QString()
     );
     //this ctor is for classes that inherit threadedFunction_c and override run themselves
     threadedFunction_c(QObject * parent_par = nullptr);
