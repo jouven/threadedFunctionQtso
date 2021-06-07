@@ -5,6 +5,7 @@
 #endif
 
 #include <QObject>
+#include <QTimer>
 
 #include <deque>
 #include <atomic>
@@ -63,20 +64,17 @@ int_fast32_t threadManager_c::threadCounterQt_f() const
     return threadCounterQt_pri;
 }
 
-//https://en.wikipedia.org/wiki/Function_pointer
-//void threadManager_c::threadTryingToStart_f(threadedFunction_c* threadFuncion_ptr_par, void(threadedFunction_c::*trueStart_fptr)())
 void threadManager_c::threadTryingToStart_f(threadedFunction_c* thread_ptr_par)
 {
-//#ifdef DEBUGJOUVEN
-//    QOUT_TS("(threadManager_c::threadTryingToStart_f(std::function<void()> trueStartFunc_par) threadCounterQt_pri "  << threadCounterQt_pri << endl);
-//    QOUT_TS("(threadManager_c::threadTryingToStart_f(std::function<void()> trueStartFunc_par) maxQThreads_pri "  << maxQThreads_pri << endl);
-//#endif
     if (threadCounterQt_pri < maxQThreads_pri)
     {
         startThread_f(thread_ptr_par);
     }
     else
     {
+#ifdef DEBUGJOUVEN
+        QOUT_TS("thread starvation threadCounterQt_pri " << threadCounterQt_pri << "\nthreadTryingToStart_f maxQThreads_pri " << maxQThreads_pri << Qt::endl);
+#endif
         threadStartFunctionQueue_pri.emplace_back(thread_ptr_par);
     }
 }
@@ -114,7 +112,7 @@ threadManager_c& threadManager_f()
 }
 
 threadedFunction_c::threadedFunction_c(
-        std::function<void()> func_par
+        const std::function<void ()>& func_par
         , const bool startEventLoop_par_con
         , QObject * parent_par
         , const QString& threadName_par_con)
@@ -136,17 +134,17 @@ threadedFunction_c::threadedFunction_c(QObject *parent_par) : threadedFunction_c
 //#endif
 //}
 
-int_fast32_t threadedFunction_c::qThreadCount_f()
+int_fast32_t threadedFunction_c::threadsInUse_f()
 {
     return threadManager_f().threadCounterQt_f();
 }
 
-int_fast32_t threadedFunction_c::maxConcurrentQThreads_f()
+int_fast32_t threadedFunction_c::maxUsableThreads_f()
 {
     return threadManager_f().maxQThreads_f();
 }
 
-void threadedFunction_c::setMaxConcurrentQThreads_f(const int_fast32_t maxQThreads_par_con)
+void threadedFunction_c::setMaxUsableThreads_f(const int_fast32_t maxQThreads_par_con)
 {
     threadManager_f().setMaxQThreads_f(maxQThreads_par_con);
 }
@@ -163,7 +161,19 @@ void threadedFunction_c::run()
 {
     if (func_pri)
     {
-        func_pri();
+        if (startEventLoop_pri)
+        {
+            //IMPORTANT DON'T USE THE STATIC FUNCTION QTimer::singleShot because the timer execution will happen in the main thread
+            QTimer* singleShopTmp(new QTimer);
+            singleShopTmp->setSingleShot(true);
+            QObject::connect(singleShopTmp, &QTimer::timeout, singleShopTmp, func_pri);
+            QObject::connect(singleShopTmp, &QTimer::timeout, singleShopTmp, &QTimer::deleteLater);
+            singleShopTmp->start(0);
+        }
+        else
+        {
+            func_pri();
+        }
     }
     if (startEventLoop_pri)
     {
